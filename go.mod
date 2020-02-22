@@ -1,3 +1,3 @@
-module kusowski.com/let-it-rain
+module kusowski.com/nimbostratus
 
 go 1.13
