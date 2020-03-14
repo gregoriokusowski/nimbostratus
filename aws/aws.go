@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"kusowski.com/nimbostratus"
+	"github.com/gregoriokusowski/nimbostratus"
 )
 
 // Based on https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"kusowski.com/nimbostratus/aws"
+	"github.com/gregoriokusowski/nimbostratus/aws"
 )
 
 const BASE_FORMAT = "%-28s %-16s"
