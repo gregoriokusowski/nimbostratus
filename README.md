@@ -1,6 +1,6 @@
 # Nimbostratus
 
-Nimbostratus is a quick (and not so reliable) tool to check which cloud zone you should use based on latency.
+Nimbostratus is a quick (and not so reliable) tool to check which cloud region you should use based on latency.
 Currently only supports AWS.
 
 ## Usage
@@ -19,7 +19,7 @@ Run
 
 ```
 $ nimbostratus
-Zone                         Id                    Ping
+Region                       Id                    Ping
 Europe (Frankfurt)           eu-central-1    [    26ms]
 Europe (Paris)               eu-west-3       [    28ms]
 Europe (Stockholm)           eu-north-1      [    37ms]
@@ -40,7 +40,7 @@ import (
 )
 
 func bla() {
-  zones := aws.GetZones(context.TODO())
+  regions := aws.GetRegions(context.TODO()) // or configure a timeout with context.WithTimeout
   // ...
 }
 ```

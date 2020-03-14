@@ -1,7 +1,9 @@
 package nimbostratus
 
-type Zone struct {
-	Id              string
-	Name            string
-	LatencyInMillis int64
+import "time"
+
+type Region struct {
+	Id      string
+	Name    string
+	Latency time.Duration
 }

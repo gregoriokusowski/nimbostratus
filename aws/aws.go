@@ -39,25 +39,25 @@ AWS GovCloud (US-East)	us-gov-east-1	rds.us-gov-east-1.amazonaws.com	HTTPS
 AWS GovCloud (US-West)	us-gov-west-1	rds.us-gov-west-1.amazonaws.com	HTTPS
 `
 
-type awsZone struct {
+type awsRegion struct {
 	id   string
 	name string
 	url  string
 }
 
-func GetZones(ctx context.Context) []nimbostratus.Zone {
-	var zones []nimbostratus.Zone
+func GetRegions(ctx context.Context) []nimbostratus.Region {
+	var regions []nimbostratus.Region
 	var wg sync.WaitGroup
-	zc := make(chan nimbostratus.Zone)
+	regc := make(chan nimbostratus.Region)
 
-	for _, option := range parseRawZones() {
+	for _, option := range parseRawRegions() {
 		wg.Add(1)
-		go func(o awsZone) {
+		go func(o awsRegion) {
 			defer wg.Done()
-			zc <- nimbostratus.Zone{
-				Id:              o.id,
-				Name:            o.name,
-				LatencyInMillis: latencyOf(o.url),
+			regc <- nimbostratus.Region{
+				Id:      o.id,
+				Name:    o.name,
+				Latency: latencyOf(o.url),
 			}
 		}(option)
 	}
@@ -67,8 +67,8 @@ func GetZones(ctx context.Context) []nimbostratus.Zone {
 	go func() {
 		for {
 			select {
-			case zone := <-zc:
-				zones = append(zones, zone)
+			case region := <-regc:
+				regions = append(regions, region)
 			case <-ctx.Done():
 				execution <- true
 			}
@@ -81,34 +81,34 @@ func GetZones(ctx context.Context) []nimbostratus.Zone {
 	}()
 
 	<-execution
-	sort.Sort(byLatency(zones))
-	return zones
+	sort.Sort(byLatency(regions))
+	return regions
 }
 
-func latencyOf(url string) int64 {
+func latencyOf(url string) time.Duration {
 	start := time.Now()
 	_, _ = http.Get("http://" + url)
 	finish := time.Now()
-	return finish.Sub(start).Milliseconds()
+	return finish.Sub(start)
 }
 
-type byLatency []nimbostratus.Zone
+type byLatency []nimbostratus.Region
 
 func (a byLatency) Len() int           { return len(a) }
 func (a byLatency) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a byLatency) Less(i, j int) bool { return a[i].LatencyInMillis < a[j].LatencyInMillis }
+func (a byLatency) Less(i, j int) bool { return a[i].Latency.Nanoseconds() < a[j].Latency.Nanoseconds() }
 
-func parseRawZones() []awsZone {
-	var zones []awsZone
+func parseRawRegions() []awsRegion {
+	var regions []awsRegion
 	for _, line := range strings.Split(strings.TrimSuffix(awsRawData, "\n"), "\n") {
 		if len(line) > 0 && !strings.Contains(line, "Region") {
 			values := strings.Split(line, "\t")
-			zones = append(zones, awsZone{
+			regions = append(regions, awsRegion{
 				name: strings.TrimSpace(values[0]),
 				id:   strings.TrimSpace(values[1]),
 				url:  strings.TrimSpace(values[2]),
 			})
 		}
 	}
-	return zones
+	return regions
 }

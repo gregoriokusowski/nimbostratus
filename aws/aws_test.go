@@ -5,36 +5,36 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	var zone awsZone
-	zones := parseRawZones()
+	var region awsRegion
+	regions := parseRawRegions()
 
-	for i := 0; i < len(zones); i++ {
-		if zones[i].id == "us-east-1" {
-			zone = zones[i]
+	for i := 0; i < len(regions); i++ {
+		if regions[i].id == "us-east-1" {
+			region = regions[i]
 		}
 	}
 
-	if zone == (awsZone{}) {
+	if region == (awsRegion{}) {
 		t.Error("Expected to find us-east-1, found nothing")
 	}
 
 	expectedName := "US East (N. Virginia)"
-	if zone.name != expectedName {
-		t.Errorf("Expected to have name [%s], found [%s]", expectedName, zone.name)
+	if region.name != expectedName {
+		t.Errorf("Expected to have name [%s], found [%s]", expectedName, region.name)
 	}
 	expectedUrl := "rds.us-east-1.amazonaws.com"
-	if zone.url != expectedUrl {
-		t.Errorf("Expected to have url [%s], found [%s]", expectedUrl, zone.url)
+	if region.url != expectedUrl {
+		t.Errorf("Expected to have url [%s], found [%s]", expectedUrl, region.url)
 	}
 }
 
 func TestLatency(t *testing.T) {
-	latencyInMillis := latencyOf("localhost")
-	if latencyInMillis == 0 {
+	latency := latencyOf("localhost")
+	if latency.Milliseconds() == 0 {
 		t.Error("Expected to get a latency for localhost")
 	}
 
-	if latencyInMillis > 100 {
+	if latency.Milliseconds() > 100 {
 		t.Error("Expected to have a low latency on localhost")
 	}
 }
