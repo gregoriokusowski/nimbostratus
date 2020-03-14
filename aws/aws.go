@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -52,6 +53,7 @@ func GetZones(_ context.Context) []nimbostratus.Zone {
 			LatencyInMillis: latencyOf(option.url),
 		})
 	}
+	sort.Sort(byLatency(zones))
 	return zones
 }
 
@@ -61,6 +63,12 @@ func latencyOf(url string) int64 {
 	finish := time.Now()
 	return finish.Sub(start).Milliseconds()
 }
+
+type byLatency []nimbostratus.Zone
+
+func (a byLatency) Len() int           { return len(a) }
+func (a byLatency) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byLatency) Less(i, j int) bool { return a[i].LatencyInMillis < a[j].LatencyInMillis }
 
 func parseRawZones() []awsZone {
 	var zones []awsZone
