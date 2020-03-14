@@ -42,8 +42,8 @@ import (
 )
 
 func bla() {
-  regions := aws.GetRegions(context.TODO()) // or configure a timeout with context.WithTimeout
-  // ...
+	regions := aws.GetRegions(context.TODO()) // or configure a timeout with context.WithTimeout
+	// ...
 }
 ```
 
