@@ -1,5 +1,7 @@
 # Nimbostratus
 
+> A nimbostratus cloud is a multi-level, gray, often dark, amorphous, nearly uniform cloud that usually produces continuous rain, snow, or sleet but no lightning or thunder. [Wikipedia](https://en.wikipedia.org/wiki/Nimbostratus_cloud)
+
 Nimbostratus is a quick (and not so reliable) tool to check which cloud region you should use based on latency.
 Currently only supports AWS.
 
