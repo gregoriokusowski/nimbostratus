@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gregoriokusowski/nimbostratus"
@@ -44,15 +45,42 @@ type awsZone struct {
 	url  string
 }
 
-func GetZones(_ context.Context) []nimbostratus.Zone {
+func GetZones(ctx context.Context) []nimbostratus.Zone {
 	var zones []nimbostratus.Zone
+	var wg sync.WaitGroup
+	zc := make(chan nimbostratus.Zone)
+
 	for _, option := range parseRawZones() {
-		zones = append(zones, nimbostratus.Zone{
-			Id:              option.id,
-			Name:            option.name,
-			LatencyInMillis: latencyOf(option.url),
-		})
+		wg.Add(1)
+		go func(o awsZone) {
+			defer wg.Done()
+			zc <- nimbostratus.Zone{
+				Id:              o.id,
+				Name:            o.name,
+				LatencyInMillis: latencyOf(o.url),
+			}
+		}(option)
 	}
+
+	execution := make(chan bool)
+
+	go func() {
+		for {
+			select {
+			case zone := <-zc:
+				zones = append(zones, zone)
+			case <-ctx.Done():
+				execution <- true
+			}
+		}
+	}()
+
+	go func() {
+		wg.Wait()
+		execution <- true
+	}()
+
+	<-execution
 	sort.Sort(byLatency(zones))
 	return zones
 }
